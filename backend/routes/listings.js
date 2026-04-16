@@ -2,14 +2,21 @@ const express = require('express');
 const Listing = require('../models/Listing');
 const Review = require('../models/Review');
 const { protect } = require('../middleware/auth');
-const { upload, cloudinary } = require('../config/cloudinary');
+const { upload, cloudinary, uploadToCloudinary } = require('../config/cloudinary');
 
 const router = express.Router();
 
-// GET /api/listings  – supports ?location=, ?category=, ?minPrice=, ?maxPrice=
+// helper to upload files to cloudinary
+const uploadFiles = async (files) => {
+    if (!files || files.length === 0) return [];
+    return Promise.all(files.map((f) => uploadToCloudinary(f.buffer)));
+};
+
+// GET /api/listings
+// query params: location, category, minPrice, maxPrice, hostId, page, limit
 router.get('/', async (req, res) => {
     try {
-        const { location, category, minPrice, maxPrice, page = 1, limit = 12 } = req.query;
+        const { location, category, minPrice, maxPrice, hostId, page = 1, limit = 12 } = req.query;
         const filter = {};
 
         if (location) {
@@ -21,6 +28,7 @@ router.get('/', async (req, res) => {
             ];
         }
         if (category) filter.category = category;
+        if (hostId) filter.host = hostId;
         if (minPrice || maxPrice) {
             filter.price = {};
             if (minPrice) filter.price.$gte = Number(minPrice);
@@ -35,7 +43,7 @@ router.get('/', async (req, res) => {
             .skip(skip)
             .limit(Number(limit));
 
-        // Compute average rating for each listing
+        // TODO: this n+1 query is a bit slow, should aggregate ratings properly later
         const listingsWithRating = await Promise.all(
             listings.map(async (listing) => {
                 const reviews = await Review.find({ listing: listing._id });
@@ -49,18 +57,29 @@ router.get('/', async (req, res) => {
 
         res.json({ success: true, total, page: Number(page), listings: listingsWithRating });
     } catch (err) {
+        console.error('Error fetching listings:', err.message);
         res.status(500).json({ success: false, message: err.message });
     }
 });
 
-// POST /api/listings  – create listing (protected, multipart)
+// POST /api/listings - create a new listing
 router.post('/', protect, upload.array('images', 10), async (req, res) => {
     try {
-        const { title, description, price, address, city, country, lng, lat, category, amenities, maxGuests, bedrooms, bathrooms } = req.body;
+        const {
+            title, description, price,
+            address, city, country, lng, lat,
+            category, amenities, maxGuests, bedrooms, bathrooms,
+            unsplashUrls,
+        } = req.body;
 
-        const images = req.files
-            ? req.files.map((f) => ({ url: f.path, publicId: f.filename }))
+        const uploadedImages = await uploadFiles(req.files);
+
+        const unsplashImages = unsplashUrls
+            ? (Array.isArray(unsplashUrls) ? unsplashUrls : [unsplashUrls])
+                .map((url) => ({ url, publicId: null }))
             : [];
+
+        const images = [...uploadedImages, ...unsplashImages];
 
         const listing = await Listing.create({
             title,
@@ -75,7 +94,9 @@ router.post('/', protect, upload.array('images', 10), async (req, res) => {
             images,
             host: req.user._id,
             category,
-            amenities: amenities ? (Array.isArray(amenities) ? amenities : amenities.split(',')) : [],
+            amenities: amenities
+                ? (Array.isArray(amenities) ? amenities : amenities.split(','))
+                : [],
             maxGuests: Number(maxGuests) || 2,
             bedrooms: Number(bedrooms) || 1,
             bathrooms: Number(bathrooms) || 1,
@@ -91,12 +112,14 @@ router.post('/', protect, upload.array('images', 10), async (req, res) => {
 // GET /api/listings/:id
 router.get('/:id', async (req, res) => {
     try {
-        const listing = await Listing.findById(req.params.id).populate('host', 'name avatar bio createdAt');
+        const listing = await Listing.findById(req.params.id)
+            .populate('host', 'name avatar bio createdAt');
         if (!listing) return res.status(404).json({ success: false, message: 'Listing not found.' });
 
         const reviews = await Review.find({ listing: listing._id })
             .populate('author', 'name avatar')
             .sort({ createdAt: -1 });
+
         const avg =
             reviews.length > 0
                 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
@@ -111,7 +134,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// PUT /api/listings/:id  – update (protected, owner only)
+// PUT /api/listings/:id - update listing
 router.put('/:id', protect, upload.array('images', 10), async (req, res) => {
     try {
         const listing = await Listing.findById(req.params.id);
@@ -120,29 +143,57 @@ router.put('/:id', protect, upload.array('images', 10), async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized.' });
         }
 
-        const { title, description, price, address, city, country, lng, lat, category, amenities, maxGuests, bedrooms, bathrooms } = req.body;
+        const {
+            title, description, price,
+            address, city, country, lng, lat,
+            category, amenities, maxGuests, bedrooms, bathrooms,
+            unsplashUrls, removedPublicIds, keepImageUrls,
+        } = req.body;
 
-        const newImages = req.files ? req.files.map((f) => ({ url: f.path, publicId: f.filename })) : [];
-        const existingImages = listing.images;
+        if (removedPublicIds) {
+            const ids = Array.isArray(removedPublicIds) ? removedPublicIds : [removedPublicIds];
+            await Promise.allSettled(
+                ids.filter(Boolean).map((pid) => cloudinary.uploader.destroy(pid))
+            );
+        }
 
-        listing.title = title || listing.title;
+        const uploadedImages = await uploadFiles(req.files);
+
+        const unsplashImages = unsplashUrls
+            ? (Array.isArray(unsplashUrls) ? unsplashUrls : [unsplashUrls])
+                .map((url) => ({ url, publicId: null }))
+            : [];
+
+        const keptUrls = keepImageUrls
+            ? (Array.isArray(keepImageUrls) ? keepImageUrls : [keepImageUrls])
+            : listing.images.map((img) => img.url);
+
+        const keptImages = listing.images.filter((img) => keptUrls.includes(img.url));
+        const finalImages = [...keptImages, ...uploadedImages, ...unsplashImages];
+
+        listing.title       = title       || listing.title;
         listing.description = description || listing.description;
-        listing.price = price ? Number(price) : listing.price;
-        listing.location = {
+        listing.price       = price       ? Number(price) : listing.price;
+        listing.location    = {
             address: address || listing.location.address,
-            city: city || listing.location.city,
+            city:    city    || listing.location.city,
             country: country || listing.location.country,
             coordinates: {
                 type: 'Point',
-                coordinates: [Number(lng) || listing.location.coordinates.coordinates[0], Number(lat) || listing.location.coordinates.coordinates[1]],
+                coordinates: [
+                    Number(lng) || listing.location.coordinates.coordinates[0],
+                    Number(lat) || listing.location.coordinates.coordinates[1],
+                ],
             },
         };
-        listing.category = category || listing.category;
-        listing.amenities = amenities ? (Array.isArray(amenities) ? amenities : amenities.split(',')) : listing.amenities;
+        listing.category  = category || listing.category;
+        listing.amenities = amenities
+            ? (Array.isArray(amenities) ? amenities : amenities.split(','))
+            : listing.amenities;
         listing.maxGuests = maxGuests ? Number(maxGuests) : listing.maxGuests;
-        listing.bedrooms = bedrooms ? Number(bedrooms) : listing.bedrooms;
+        listing.bedrooms  = bedrooms  ? Number(bedrooms)  : listing.bedrooms;
         listing.bathrooms = bathrooms ? Number(bathrooms) : listing.bathrooms;
-        listing.images = newImages.length > 0 ? [...existingImages, ...newImages] : existingImages;
+        listing.images    = finalImages;
 
         await listing.save();
         await listing.populate('host', 'name avatar');
@@ -152,7 +203,7 @@ router.put('/:id', protect, upload.array('images', 10), async (req, res) => {
     }
 });
 
-// DELETE /api/listings/:id  (protected, owner only)
+// DELETE /api/listings/:id
 router.delete('/:id', protect, async (req, res) => {
     try {
         const listing = await Listing.findById(req.params.id);
@@ -161,7 +212,7 @@ router.delete('/:id', protect, async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized.' });
         }
 
-        // Clean up Cloudinary images
+        // remove images from cloudinary first
         if (listing.images && listing.images.length > 0) {
             await Promise.allSettled(
                 listing.images

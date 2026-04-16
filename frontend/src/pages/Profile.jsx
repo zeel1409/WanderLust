@@ -15,10 +15,9 @@ const Profile = () => {
     useEffect(() => {
         const fetchMyListings = async () => {
             try {
-                // Fetch all listings then filter by host
-                const { data } = await api.get('/listings', { params: { limit: 100 } });
-                const mine = data.listings.filter((l) => l.host?._id === user._id);
-                setListings(mine);
+                // Fix: use hostId filter on backend instead of fetching all & filtering client-side
+                const { data } = await api.get('/listings', { params: { hostId: user._id, limit: 100 } });
+                setListings(data.listings || []);
             } catch {
                 toast.error('Failed to load listings');
             } finally {

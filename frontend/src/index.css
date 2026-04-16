@@ -12,7 +12,6 @@
   --color-light: #F7F7F7;
 }
 
-/* Dark mode base */
 .dark body {
   background: #111827;
   color: #f3f4f6;
@@ -26,22 +25,11 @@
   background: #4b5563;
 }
 
-.dark .skeleton {
-  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-}
-
 .dark .input-field {
   background: #1f2937;
   border-color: #374151;
   color: #f3f4f6;
 }
-
-.dark .glass {
-  background: rgba(17, 24, 39, 0.85);
-}
-
 
 html {
   scroll-behavior: smooth;
@@ -59,7 +47,6 @@ body {
   padding: 0;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -78,13 +65,11 @@ body {
   background: #a8a8a8;
 }
 
-/* Smooth transitions globally */
 a,
 button {
   transition: all 0.2s ease;
 }
 
-/* Card hover lift */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -94,7 +79,7 @@ button {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
-/* Primary button */
+/* primary button */
 .btn-primary {
   background: linear-gradient(to right, #FF385C, #E31C5F);
   color: white;
@@ -108,12 +93,10 @@ button {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(to right, #E31C5F, #FF385C);
-  box-shadow: 0 4px 20px rgba(227, 28, 95, 0.3);
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
-/* Input field */
 .input-field {
   width: 100%;
   border: 1.5px solid #ddd;
@@ -131,49 +114,7 @@ button {
   box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(to right, #FF385C, #FF6B6B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glass effect */
-.glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Skeleton loading */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 8px;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Star rating */
-.star-filled {
-  color: #FF385C;
-}
-
-.star-empty {
-  color: #ddd;
-}
-
-/* Category pill */
+/* category pill */
 .category-pill {
   display: flex;
   flex-direction: column;
@@ -186,28 +127,16 @@ button {
   font-weight: 500;
   color: #717171;
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.2s ease;
   border-bottom: 2px solid transparent;
   background: transparent;
   position: relative;
 }
 
-.category-pill span:first-child {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: block;
-}
-
 .category-pill:hover {
   color: #222;
   background: #f5f5f5;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  border-bottom-color: transparent;
-}
-
-.category-pill:hover span:first-child {
-  transform: scale(1.25);
 }
 
 .category-pill.active {
@@ -215,19 +144,37 @@ button {
   font-weight: 700;
   background: #fff;
   border-bottom: 2px solid #FF385C;
-  transform: translateY(0);
-  box-shadow: none;
 }
 
-.category-pill.active span:first-child {
-  transform: scale(1.1);
+/* TODO: maybe add a loading spinner component instead of text */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #FF385C;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  animation: spin 0.8s linear infinite;
 }
 
-.category-pill:active {
-  transform: scale(0.95);
+/* skeleton loading - used in detail/edit/profile pages */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
 }
 
-/* Map marker */
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* map marker */
 .mapbox-marker {
   background: #FF385C;
   color: white;
@@ -238,4 +185,114 @@ button {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   cursor: pointer;
   white-space: nowrap;
+}
+
+/* navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.dark .navbar {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.navbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 1rem;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+  padding: 8px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex: 1;
+  max-width: 400px;
+  cursor: pointer;
+}
+
+.search-bar:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: #FF385C;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* property card */
+.property-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.dark .property-card {
+  background: #1f2937;
+}
+
+.property-img-wrap {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.property-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.property-card:hover .property-img-wrap img {
+  transform: scale(1.04);
+}
+
+.property-info {
+  padding: 12px 4px 4px;
 }

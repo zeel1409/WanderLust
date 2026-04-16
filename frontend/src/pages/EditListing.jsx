@@ -14,8 +14,9 @@ const EditListing = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
-    const [images, setImages] = useState([]);
-    const [imagePreviews, setImagePreviews] = useState([]);
+    const [newFiles, setNewFiles] = useState([]);           // new File uploads
+    const [existingImages, setExistingImages] = useState([]); // { url, publicId }
+    const [removedPublicIds, setRemovedPublicIds] = useState([]); // Cloudinary publicIds to delete
     const [form, setForm] = useState({
         title: '', description: '', price: '',
         address: '', city: '', country: '',
@@ -25,21 +26,33 @@ const EditListing = () => {
         maxGuests: 2, bedrooms: 1, bathrooms: 1,
     });
 
+    // Fix: proper deps — include user and navigate to prevent stale closure
     useEffect(() => {
         const fetchListing = async () => {
             try {
                 const { data } = await api.get(`/listings/${id}`);
                 const l = data.listing;
-                if (l.host._id !== user._id) { toast.error('Not authorized'); navigate('/'); return; }
+                if (l.host._id !== user._id) {
+                    toast.error('Not authorized');
+                    navigate('/');
+                    return;
+                }
                 setForm({
-                    title: l.title, description: l.description, price: l.price,
-                    address: l.location.address, city: l.location.city, country: l.location.country,
+                    title: l.title,
+                    description: l.description,
+                    price: l.price,
+                    address: l.location.address,
+                    city: l.location.city,
+                    country: l.location.country,
                     lng: l.location.coordinates?.coordinates?.[0] || '',
                     lat: l.location.coordinates?.coordinates?.[1] || '',
-                    category: l.category, amenities: l.amenities || [],
-                    maxGuests: l.maxGuests, bedrooms: l.bedrooms, bathrooms: l.bathrooms,
+                    category: l.category,
+                    amenities: l.amenities || [],
+                    maxGuests: l.maxGuests,
+                    bedrooms: l.bedrooms,
+                    bathrooms: l.bathrooms,
                 });
-                setImagePreviews(l.images?.map((i) => i.url) || []);
+                setExistingImages(l.images || []);
             } catch {
                 toast.error('Failed to load listing');
                 navigate('/');
@@ -48,13 +61,23 @@ const EditListing = () => {
             }
         };
         fetchListing();
-    }, [id]);
+    }, [id, user, navigate]); // Fix: proper dependency array
 
     const toggleAmenity = (a) => {
         setForm((p) => ({
             ...p,
-            amenities: p.amenities.includes(a) ? p.amenities.filter((x) => x !== a) : [...p.amenities, a],
+            amenities: p.amenities.includes(a)
+                ? p.amenities.filter((x) => x !== a)
+                : [...p.amenities, a],
         }));
+    };
+
+    // Fix: remove an existing image — track its publicId for Cloudinary deletion
+    const removeExistingImage = (img, index) => {
+        setExistingImages((prev) => prev.filter((_, i) => i !== index));
+        if (img.publicId) {
+            setRemovedPublicIds((prev) => [...prev, img.publicId]);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -66,7 +89,13 @@ const EditListing = () => {
                 if (Array.isArray(v)) v.forEach((item) => formData.append(k, item));
                 else formData.append(k, v);
             });
-            images.forEach((img) => formData.append('images', img));
+            // New file uploads
+            newFiles.forEach((file) => formData.append('images', file));
+            // Fix: which existing images to keep (backend rebuilds the list)
+            existingImages.forEach((img) => formData.append('keepImageUrls', img.url));
+            // Fix: which Cloudinary images to delete
+            removedPublicIds.forEach((pid) => formData.append('removedPublicIds', pid));
+
             const { data } = await api.put(`/listings/${id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
@@ -99,26 +128,55 @@ const EditListing = () => {
             <div className="max-w-2xl mx-auto px-4 py-10">
                 <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Edit your listing</h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
+
+                    {/* Title */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title *</label>
-                        <input className="input-field" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                        <input
+                            className="input-field"
+                            value={form.title}
+                            onChange={(e) => setForm({ ...form, title: e.target.value })}
+                            required
+                        />
                     </div>
+
+                    {/* Description */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description *</label>
-                        <textarea className="input-field resize-none" rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+                        <textarea
+                            className="input-field resize-none"
+                            rows={4}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            required
+                        />
                     </div>
+
+                    {/* Price + Category */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price ($/night) *</label>
-                            <input type="number" className="input-field" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+                            <input
+                                type="number"
+                                className="input-field"
+                                value={form.price}
+                                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
-                            <select className="input-field" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                            <select
+                                className="input-field"
+                                value={form.category}
+                                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                            >
                                 {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
+
+                    {/* City + Country */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">City *</label>
@@ -129,31 +187,44 @@ const EditListing = () => {
                             <input className="input-field" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} required />
                         </div>
                     </div>
+
+                    {/* Address */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
                         <input className="input-field" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
                     </div>
+
+                    {/* Guests / Bedrooms / Bathrooms */}
                     <div className="grid grid-cols-3 gap-4">
                         {[['maxGuests', '👥 Max guests', 1, 20], ['bedrooms', '🛏 Bedrooms', 0, 20], ['bathrooms', '🚿 Bathrooms', 0, 10]].map(([key, label, min, max]) => (
                             <div key={key}>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">{label}</label>
                                 <div className="flex items-center gap-2">
-                                    <button type="button" onClick={() => setForm((p) => ({ ...p, [key]: Math.max(min, p[key] - 1) }))} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">–</button>
+                                    <button type="button" onClick={() => setForm((p) => ({ ...p, [key]: Math.max(min, p[key] - 1) }))} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500">–</button>
                                     <span className="text-sm font-semibold w-5 text-center">{form[key]}</span>
-                                    <button type="button" onClick={() => setForm((p) => ({ ...p, [key]: Math.min(max, p[key] + 1) }))} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">+</button>
+                                    <button type="button" onClick={() => setForm((p) => ({ ...p, [key]: Math.min(max, p[key] + 1) }))} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500">+</button>
                                 </div>
                             </div>
                         ))}
                     </div>
 
+                    {/* Amenities */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-3">Amenities</label>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {AMENITIES_LIST.map((a) => (
-                                <button key={a} type="button" onClick={() => toggleAmenity(a)}
-                                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm transition-all text-left ${form.amenities.includes(a) ? 'border-gray-900 bg-gray-50 font-medium' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}>
+                                <button
+                                    key={a}
+                                    type="button"
+                                    onClick={() => toggleAmenity(a)}
+                                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm transition-all text-left ${form.amenities.includes(a) ? 'border-gray-900 bg-gray-50 font-medium' : 'border-gray-200 hover:border-gray-300 text-gray-600'}`}
+                                >
                                     <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${form.amenities.includes(a) ? 'bg-gray-900 border-gray-900' : 'border-gray-300'}`}>
-                                        {form.amenities.includes(a) && <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                                        {form.amenities.includes(a) && (
+                                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
                                     </span>
                                     {a}
                                 </button>
@@ -161,25 +232,70 @@ const EditListing = () => {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Add new photos</label>
-                        <label className="flex items-center gap-3 w-full border-2 border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-[#FF385C] transition-colors bg-gray-50">
-                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <span className="text-sm text-gray-500 font-medium">Click to select images</span>
-                            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { setImages(Array.from(e.target.files)); }} />
-                        </label>
-                        {imagePreviews.length > 0 && (
-                            <div className="grid grid-cols-4 gap-2 mt-3">
-                                {imagePreviews.slice(0, 4).map((src, i) => (
-                                    <img key={i} src={src} alt="" className="aspect-square rounded-lg object-cover" />
+                    {/* Fix: Existing images with hover-to-remove */}
+                    {existingImages.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Current photos
+                                <span className="ml-2 text-xs font-normal text-gray-400">(hover → click ✕ to remove)</span>
+                            </label>
+                            <div className="grid grid-cols-4 gap-2">
+                                {existingImages.map((img, i) => (
+                                    <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-100">
+                                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeExistingImage(img, i)}
+                                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xl"
+                                        >
+                                            ✕
+                                        </button>
+                                        {i === 0 && (
+                                            <div className="absolute bottom-1 left-1 bg-gray-900/70 text-white text-[10px] px-1.5 py-0.5 rounded font-medium pointer-events-none">
+                                                Cover
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
-                        )}
+                        </div>
+                    )}
+
+                    {/* Add new photos */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Add new photos</label>
+                        <label className="flex items-center gap-3 w-full border-2 border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-[#FF385C] transition-colors bg-gray-50 hover:bg-red-50">
+                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-sm text-gray-500 font-medium">
+                                {newFiles.length > 0 ? `${newFiles.length} file${newFiles.length > 1 ? 's' : ''} selected` : 'Click to select images'}
+                            </span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => setNewFiles(Array.from(e.target.files))}
+                            />
+                        </label>
                     </div>
 
+                    {/* Action buttons */}
                     <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => navigate(-1)} className="flex-1 border border-gray-200 rounded-lg py-3 font-semibold text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" disabled={loading} className="btn-primary flex-1" style={{ opacity: loading ? 0.7 : 1 }}>
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="flex-1 border border-gray-200 rounded-lg py-3 font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-primary flex-1"
+                            style={{ opacity: loading ? 0.7 : 1 }}
+                        >
                             {loading ? 'Saving...' : '✅ Save changes'}
                         </button>
                     </div>
