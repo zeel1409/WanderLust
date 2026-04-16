@@ -1,102 +1,130 @@
 # WanderLust
 
-A property listing and booking web app built with React and Node.js. Think Airbnb, but for learning full-stack development.
+WanderLust is a full-stack property listing app inspired by Airbnb.  
+The goal of this project is simple: build a clean, modern travel listing platform while practicing real-world full-stack workflows.
 
----
+Users can explore listings, filter by category, open a listing with map and weather details, and post reviews. Hosts can create, edit, and delete their own listings.
 
-## What this project does
+## Stack
 
-Users can browse property listings, filter by category (beach, mountains, city etc.), view listing details with a map and weather info, write reviews, and hosts can add/edit/delete their own listings.
+- Frontend: React (Vite), React Router, Tailwind CSS
+- Backend: Node.js, Express
+- Database: MongoDB Atlas
+- Image hosting: Cloudinary
+- Auth: JWT (stored in localStorage)
+- Maps: Mapbox (`react-map-gl`)
 
-## Tech used
+## Features
 
-- **Frontend**: React (Vite), React Router, Tailwind CSS
-- **Backend**: Node.js, Express
-- **Database**: MongoDB Atlas
-- **Images**: Cloudinary
-- **Auth**: JWT tokens stored in localStorage
-- **Map**: react-map-gl (Mapbox)
+- Browse all listings on the home page
+- Filter listings by category (beach, mountains, city, etc.)
+- View listing details with map and weather info
+- User authentication (signup/login)
+- Review system
+- Host dashboard actions (create/update/delete own listings)
 
-## Running locally
+## Local setup
 
-You need Node.js 18+ and accounts on MongoDB Atlas and Cloudinary.
+### 1) Prerequisites
 
-**Backend:**
+Make sure you have:
+
+- Node.js 18 or higher
+- A MongoDB Atlas database
+- A Cloudinary account
+- (Optional) Mapbox token for maps
+- (Optional) OpenWeather API key for weather widget
+
+### 2) Clone and install
+
+```bash
+git clone <your-repo-url>
+cd WanderLust
 ```
+
+### 3) Backend setup
+
+```bash
 cd backend
 npm install
 cp .env.example .env
-# fill in your MongoDB URI, Cloudinary keys, JWT secret
+```
+
+Start backend:
+
+```bash
 npm run dev
 ```
 
-**Frontend:**
-```
+### 4) Frontend setup
+
+In a new terminal:
+
+```bash
 cd frontend
 npm install
-cp .env.example .env
-# set VITE_API_URL=http://localhost:5000/api
+
+Start frontend:
+
+```bash
 npm run dev
 ```
 
-The frontend runs on port 5173, backend on 5000.
+App URLs:
 
-## Seeding the database
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:5000`
 
-```
+## Seed sample data
+
+To prefill the database with demo listings:
+
+```bash
 cd backend
 node seed.js
 ```
 
-This adds some sample listings so the home page doesn't look empty.
+## Project structure
 
-## Project layout
-
-```
+```text
 WanderLust/
   backend/
-    config/       - db and cloudinary setup
-    middleware/   - JWT auth check
-    models/       - mongoose schemas
-    routes/       - express routes
+    config/       # DB and Cloudinary config
+    middleware/   # Auth middleware
+    models/       # Mongoose schemas
+    routes/       # Express routes
     server.js
     seed.js
   frontend/
     src/
-      api/        - axios setup
-      components/ - Navbar, PropertyCard etc
-      context/    - auth, dark mode, wishlist
-      pages/      - Home, Login, ListingDetail etc
-```
-
-## Known issues / limitations
-
-- Booking is not implemented yet (reserve button shows a "coming soon" toast)
-- No email verification on signup
-- Map won't work without a Mapbox token in the env file
-- Weather widget uses OpenWeatherMap, also needs an API key
-
-## Environment variables
-
-Backend `.env`:
-```
-MONGODB_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLIENT_URL=http://localhost:5173
-PORT=5000
-```
-
-Frontend `.env`:
-```
-VITE_API_URL=http://localhost:5000/api
-VITE_MAPBOX_TOKEN=
-VITE_WEATHER_API_KEY=
+      api/        # API client setup
+      components/ # Shared UI components
+      context/    # App contexts (auth, theme, wishlist, etc.)
+      pages/      # Route pages
 ```
 
 ## Deployment
 
-- Frontend: Vercel (vercel.json is already set up)
-- Backend: Render (render.yaml is already set up)
+This repo is prepared for split deployment:
+
+- Frontend -> Vercel
+- Backend -> Render
+
+Basic flow:
+
+1. Deploy backend on Render and set backend environment variables.
+2. Copy backend URL and set it as `VITE_API_URL` in frontend environment settings on Vercel.
+3. Add your frontend URL to backend `CLIENT_URL` and CORS settings.
+4. Redeploy both services.
+
+## Known limitations
+
+- Booking flow is not implemented yet (reserve button is placeholder)
+- Signup does not include email verification
+- Map requires a valid Mapbox token
+- Weather widget requires a valid OpenWeather API key
+
+## Contributing
+
+Contributions are welcome.  
+If you plan to make larger changes, open an issue first so we can align on scope before implementation.
