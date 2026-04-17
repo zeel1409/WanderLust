@@ -20,6 +20,21 @@ app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/listings/:id/reviews', reviewRoutes);
 
+// root route so Render URL doesn't show 404
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: 'WanderLust API is live',
+        health: '/health',
+        apiHealth: '/api/health'
+    });
+});
+
+// platform-friendly health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 // simple health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
