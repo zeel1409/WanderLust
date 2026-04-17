@@ -12,7 +12,27 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+const allowedOrigins = [
+    ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean) : []),
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean) : []),
+    'http://localhost:5173'
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // allow server-to-server or curl-like requests with no Origin header
+        if (!origin) return callback(null, true);
+
+        // exact match from env
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+
+        // allow Vercel preview/production domains
+        if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return callback(null, true);
+
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
