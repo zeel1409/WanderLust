@@ -94,8 +94,8 @@ const Login = () => {
 
                 <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#9ca3af' }}>
                     By logging in you agree to our{' '}
-                    <a href="#" style={{ textDecoration: 'underline', color: '#6b7280' }}>Terms</a> and{' '}
-                    <a href="#" style={{ textDecoration: 'underline', color: '#6b7280' }}>Privacy Policy</a>.
+                    <Link to="/terms" style={{ textDecoration: 'underline', color: '#6b7280' }}>Terms</Link> and{' '}
+                    <Link to="/privacy" style={{ textDecoration: 'underline', color: '#6b7280' }}>Privacy Policy</Link>.
                 </p>
             </div>
         </div>
