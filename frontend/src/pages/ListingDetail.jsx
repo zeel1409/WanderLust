@@ -14,7 +14,7 @@ const AMENITY_ICONS = {
     'Hot tub': '♨️', Balcony: '🌅', Garden: '🌿', 'Pet friendly': '🐾',
 };
 
-const ReviewCard = ({ review, currentUserId, onDelete }) => (
+const ReviewCard = ({ review, currentUserId, onDelete, confirmId, setConfirmId }) => (
     <div className="py-5 border-b border-gray-100 last:border-0">
         <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: '#FF385C' }}>
@@ -30,7 +30,15 @@ const ReviewCard = ({ review, currentUserId, onDelete }) => (
                         </div>
                     </div>
                     {currentUserId === review.author?._id && (
-                        <button onClick={() => onDelete(review._id)} className="text-xs text-red-400 hover:text-red-600 font-medium">Delete</button>
+                        confirmId === review._id ? (
+                            <div className="flex items-center gap-1">
+                                <span className="text-xs text-gray-500">Sure?</span>
+                                <button onClick={() => onDelete(review._id)} className="text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full hover:bg-red-600">Yes</button>
+                                <button onClick={() => setConfirmId(null)} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                            </div>
+                        ) : (
+                            <button onClick={() => setConfirmId(review._id)} className="text-xs text-red-400 hover:text-red-600 font-medium">Delete</button>
+                        )
                     )}
                 </div>
                 <p className="text-gray-600 text-sm mt-2 leading-relaxed">{review.comment}</p>
@@ -48,7 +56,14 @@ const ListingDetail = () => {
     const [showAllPhotos, setShowAllPhotos] = useState(false);
     const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
     const [submitting, setSubmitting] = useState(false);
-    const [nights, setNights] = useState(5);
+    const [confirmDeleteListing, setConfirmDeleteListing] = useState(false);
+    const [confirmDeleteReview, setConfirmDeleteReview] = useState(null); // holds reviewId
+    const today = new Date().toISOString().split('T')[0];
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const nights = checkIn && checkOut
+        ? Math.max(0, Math.round((new Date(checkOut) - new Date(checkIn)) / 86400000))
+        : 5;
 
     const isOwner = user && listing && listing.host?._id === user._id;
 
@@ -68,7 +83,6 @@ const ListingDetail = () => {
     useEffect(() => { fetchListing(); }, [fetchListing]);
 
     const handleDelete = async () => {
-        if (!window.confirm('Delete this listing? This cannot be undone.')) return;
         try {
             await api.delete(`/listings/${id}`);
             toast.success('Listing deleted');
@@ -95,10 +109,10 @@ const ListingDetail = () => {
     };
 
     const deleteReview = async (reviewId) => {
-        if (!window.confirm('Delete this review?')) return;
         try {
             await api.delete(`/listings/${id}/reviews/${reviewId}`);
             toast.success('Review deleted');
+            setConfirmDeleteReview(null);
             fetchListing();
         } catch {
             toast.error('Failed to delete review');
@@ -152,7 +166,15 @@ const ListingDetail = () => {
                     {isOwner && (
                         <div className="flex gap-2 shrink-0">
                             <Link to={`/listings/${id}/edit`} className="text-sm font-semibold border border-gray-200 px-4 py-2 rounded-full hover:bg-gray-50">Edit</Link>
-                            <button onClick={handleDelete} className="text-sm font-semibold border border-red-200 text-red-500 px-4 py-2 rounded-full hover:bg-red-50">Delete</button>
+                            {confirmDeleteListing ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="text-xs text-gray-500 mr-1">Sure?</span>
+                                    <button onClick={handleDelete} className="text-xs font-semibold bg-red-500 text-white px-3 py-1.5 rounded-full hover:bg-red-600">Yes, delete</button>
+                                    <button onClick={() => setConfirmDeleteListing(false)} className="text-xs font-semibold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Cancel</button>
+                                </div>
+                            ) : (
+                                <button onClick={() => setConfirmDeleteListing(true)} className="text-sm font-semibold border border-red-200 text-red-500 px-4 py-2 rounded-full hover:bg-red-50">Delete</button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -267,7 +289,14 @@ const ListingDetail = () => {
                             ) : (
                                 <div>
                                     {listing.reviews?.map((r) => (
-                                        <ReviewCard key={r._id} review={r} currentUserId={user?._id} onDelete={deleteReview} />
+                                        <ReviewCard
+                                            key={r._id}
+                                            review={r}
+                                            currentUserId={user?._id}
+                                            onDelete={deleteReview}
+                                            confirmId={confirmDeleteReview}
+                                            setConfirmId={setConfirmDeleteReview}
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -315,11 +344,23 @@ const ListingDetail = () => {
                                     <div className="grid grid-cols-2 divide-x divide-gray-200">
                                         <div className="p-3">
                                             <p className="text-xs font-bold text-gray-800 uppercase tracking-wider">Check-in</p>
-                                            <p className="text-sm text-gray-500 mt-1">Add date</p>
+                                            <input
+                                                type="date"
+                                                min={today}
+                                                value={checkIn}
+                                                onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }}
+                                                className="text-sm text-gray-700 mt-1 w-full border-0 outline-none bg-transparent cursor-pointer"
+                                            />
                                         </div>
                                         <div className="p-3">
                                             <p className="text-xs font-bold text-gray-800 uppercase tracking-wider">Checkout</p>
-                                            <p className="text-sm text-gray-500 mt-1">Add date</p>
+                                            <input
+                                                type="date"
+                                                min={checkIn || today}
+                                                value={checkOut}
+                                                onChange={(e) => setCheckOut(e.target.value)}
+                                                className="text-sm text-gray-700 mt-1 w-full border-0 outline-none bg-transparent cursor-pointer"
+                                            />
                                         </div>
                                     </div>
                                     <div className="border-t border-gray-200 p-3">
@@ -333,11 +374,7 @@ const ListingDetail = () => {
                                 {/* Nights selector */}
                                 <div className="flex items-center justify-between mb-4">
                                     <p className="text-sm text-gray-600">Nights</p>
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={() => setNights((n) => Math.max(1, n - 1))} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500">–</button>
-                                        <span className="text-sm font-semibold w-5 text-center">{nights}</span>
-                                        <button onClick={() => setNights((n) => n + 1)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-gray-500">+</button>
-                                    </div>
+                                    <span className="text-sm font-semibold">{nights}</span>
                                 </div>
 
                                 {user ? (

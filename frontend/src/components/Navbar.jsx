@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../context/DarkModeContext';
 import { useWishlist } from '../context/WishlistContext';
 
-// TODO: close dropdown on Escape key press
 const Navbar = ({ onSearch }) => {
     const { user, logout } = useAuth();
     const { dark, toggle: toggleDark } = useDarkMode();
@@ -20,8 +19,15 @@ const Navbar = ({ onSearch }) => {
                 setMenuOpen(false);
             }
         };
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setMenuOpen(false);
+        };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
     const handleSearch = (e) => {
@@ -106,19 +112,34 @@ const Navbar = ({ onSearch }) => {
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '8px',
                                         border: '1px solid #e5e7eb', borderRadius: '9999px',
-                                        padding: '8px 12px', background: 'white', cursor: 'pointer'
+                                        padding: '8px 12px', background: 'white', cursor: 'pointer',
+                                        position: 'relative'
                                     }}
                                 >
                                     <svg style={{ width: '20px', height: '20px', color: '#374151' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
-                                    <div style={{
-                                        width: '28px', height: '28px', borderRadius: '50%',
-                                        background: '#FF385C', color: 'white',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.75rem', fontWeight: 700
-                                    }}>
-                                        {user.name?.charAt(0).toUpperCase()}
+                                    <div style={{ position: 'relative' }}>
+                                        <div style={{
+                                            width: '28px', height: '28px', borderRadius: '50%',
+                                            background: '#FF385C', color: 'white',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '0.75rem', fontWeight: 700
+                                        }}>
+                                            {user.name?.charAt(0).toUpperCase()}
+                                        </div>
+                                        {wishlist.length > 0 && (
+                                            <span style={{
+                                                position: 'absolute', top: '-4px', right: '-4px',
+                                                background: '#FF385C', color: 'white',
+                                                borderRadius: '9999px', fontSize: '0.6rem',
+                                                fontWeight: 700, minWidth: '16px', height: '16px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                padding: '0 3px', border: '2px solid white', lineHeight: 1
+                                            }}>
+                                                {wishlist.length}
+                                            </span>
+                                        )}
                                     </div>
                                 </button>
                                 {menuOpen && (

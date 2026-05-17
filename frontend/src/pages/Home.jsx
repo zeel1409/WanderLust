@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CategoryFilter from '../components/CategoryFilter';
 import PropertyCard from '../components/PropertyCard';
@@ -36,7 +37,7 @@ const Home = () => {
         });
     };
 
-    const fetchListings = async () => {
+    const fetchListings = useCallback(async () => {
         setLoading(true);
         try {
             const params = { page, limit: 12 };
@@ -47,7 +48,6 @@ const Home = () => {
             const fetched = data.listings || [];
 
             if (fetched.length === 0) {
-                // no listings in DB, show demo data
                 setListings(filterDemo(DEMO_LISTINGS));
                 setIsDemo(true);
                 setTotalPages(1);
@@ -57,7 +57,6 @@ const Home = () => {
                 setTotalPages(Math.max(1, Math.ceil((data.total || 0) / 12)));
             }
         } catch (err) {
-            // backend might be down, just show demo
             console.log('Could not reach backend, showing demo listings');
             setListings(filterDemo(DEMO_LISTINGS));
             setIsDemo(true);
@@ -65,11 +64,11 @@ const Home = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [category, search, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         fetchListings();
-    }, [category, search, page]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fetchListings]);
 
     return (
         <div style={{ minHeight: '100vh', background: 'white' }}>
@@ -207,16 +206,25 @@ const Home = () => {
                             <p style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Explore</p>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 {['Beach', 'Mountains', 'City', 'Desert', 'Luxury'].map((l) => (
-                                    <li key={l}><a href="#" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>{l}</a></li>
+                                    <li key={l}>
+                                        <Link
+                                            to="/"
+                                            onClick={() => { setCategory(l); setPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                            style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}
+                                        >
+                                            {l}
+                                        </Link>
+                                    </li>
                                 ))}
                             </ul>
                         </div>
                         <div>
                             <p style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Support</p>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {['Help Center', 'Contact Us', 'Privacy Policy'].map((l) => (
-                                    <li key={l}><a href="#" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>{l}</a></li>
-                                ))}
+                                <li><Link to="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Help Center</Link></li>
+                                <li><Link to="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Contact Us</Link></li>
+                                <li><Link to="/privacy" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Privacy Policy</Link></li>
+                                <li><Link to="/terms" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Terms of Service</Link></li>
                             </ul>
                         </div>
                     </div>

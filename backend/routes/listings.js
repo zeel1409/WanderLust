@@ -43,17 +43,13 @@ router.get('/', async (req, res) => {
             .skip(skip)
             .limit(Number(limit));
 
-        // TODO: this n+1 query is a bit slow, should aggregate ratings properly later
-        const listingsWithRating = await Promise.all(
-            listings.map(async (listing) => {
-                const reviews = await Review.find({ listing: listing._id });
-                const avg =
-                    reviews.length > 0
-                        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-                        : 0;
-                return { ...listing.toObject(), averageRating: avg, reviewCount: reviews.length };
-            })
-        );
+        // averageRating and reviewCount are stored on the listing document,
+        // so no extra queries needed per listing.
+        const listingsWithRating = listings.map((l) => ({
+            ...l.toObject(),
+            averageRating: l.averageRating ?? 0,
+            reviewCount: l.reviewCount ?? 0,
+        }));
 
         res.json({ success: true, total, page: Number(page), listings: listingsWithRating });
     } catch (err) {

@@ -5,6 +5,16 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router({ mergeParams: true });
 
+// helper: recalculate and persist rating stats on the listing
+const syncRatingStats = async (listingId) => {
+    const reviews = await Review.find({ listing: listingId });
+    const reviewCount = reviews.length;
+    const averageRating = reviewCount > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+        : 0;
+    await Listing.findByIdAndUpdate(listingId, { averageRating, reviewCount });
+};
+
 // POST /api/listings/:id/reviews
 router.post('/', protect, async (req, res) => {
     try {
@@ -27,6 +37,10 @@ router.post('/', protect, async (req, res) => {
             comment,
         });
         await review.populate('author', 'name avatar');
+
+        // keep denormalized stats in sync
+        await syncRatingStats(req.params.id);
+
         res.status(201).json({ success: true, review });
     } catch (err) {
         if (err.code === 11000) {
@@ -45,6 +59,10 @@ router.delete('/:reviewId', protect, async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized.' });
         }
         await Review.findByIdAndDelete(req.params.reviewId);
+
+        // keep denormalized stats in sync
+        await syncRatingStats(req.params.id);
+
         res.json({ success: true, message: 'Review deleted.' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

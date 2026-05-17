@@ -48,6 +48,8 @@ const listingSchema = new mongoose.Schema(
         bedrooms: { type: Number, default: 1, min: 0 },
         bathrooms: { type: Number, default: 1, min: 0 },
         isFeatured: { type: Boolean, default: false },
+        averageRating: { type: Number, default: 0 },
+        reviewCount: { type: Number, default: 0 },
     },
     {
         timestamps: true,

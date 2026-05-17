@@ -1,22 +1,48 @@
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useWishlist } from '../context/WishlistContext';
+import { useState, useRef, useEffect } from 'react';
 
 const PropertyCard = ({ listing }) => {
     const { toggle: toggleWishlist, isWishlisted } = useWishlist();
     const liked = isWishlisted(listing._id);
     const isDemo = listing._id?.startsWith('demo-');
 
-    // just use first image for now
-    // TODO: maybe add a simple image gallery later
-    const imgUrl = listing.images?.[0]?.url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop';
+    const images = listing.images?.length > 0
+        ? listing.images.map((img) => img.url)
+        : ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop'];
+
+    const [imgIndex, setImgIndex] = useState(0);
+    const [fade, setFade] = useState(true);
+    const intervalRef = useRef(null);
+
+    const startCycle = () => {
+        if (images.length <= 1) return;
+        intervalRef.current = setInterval(() => {
+            setFade(false);
+            setTimeout(() => {
+                setImgIndex((i) => (i + 1) % images.length);
+                setFade(true);
+            }, 150);
+        }, 1200);
+    };
+
+    const stopCycle = () => {
+        clearInterval(intervalRef.current);
+        setImgIndex(0);
+        setFade(true);
+    };
+
+    useEffect(() => () => clearInterval(intervalRef.current), []);
 
     const cardContent = (
-        <div className="property-card">
+        <div className="property-card" onMouseEnter={startCycle} onMouseLeave={stopCycle}>
             <div className="property-img-wrap">
                 <img
-                    src={imgUrl}
+                    src={images[imgIndex]}
                     alt={listing.title}
+                    loading="lazy"
+                    style={{ transition: 'opacity 0.15s ease', opacity: fade ? 1 : 0 }}
                     onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop';
                     }}
