@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const listingRoutes = require('./routes/listings');
 const reviewRoutes = require('./routes/reviews');
+const bookingRoutes = require('./routes/bookings');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -41,6 +42,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/listings/:id/reviews', reviewRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // root route so Render URL doesn't show 404
 app.get('/', (req, res) => {

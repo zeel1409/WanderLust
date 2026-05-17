@@ -57,13 +57,16 @@ const ListingDetail = () => {
     const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
     const [submitting, setSubmitting] = useState(false);
     const [confirmDeleteListing, setConfirmDeleteListing] = useState(false);
-    const [confirmDeleteReview, setConfirmDeleteReview] = useState(null); // holds reviewId
+    const [confirmDeleteReview, setConfirmDeleteReview] = useState(null);
     const today = new Date().toISOString().split('T')[0];
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
+    const [guests, setGuests] = useState(1);
+    const [bookingLoading, setBookingLoading] = useState(false);
+    const [confirmedBooking, setConfirmedBooking] = useState(null);
     const nights = checkIn && checkOut
         ? Math.max(0, Math.round((new Date(checkOut) - new Date(checkIn)) / 86400000))
-        : 5;
+        : 0;
 
     const isOwner = user && listing && listing.host?._id === user._id;
 
@@ -119,6 +122,32 @@ const ListingDetail = () => {
         }
     };
 
+    const handleReserve = async () => {
+        if (!checkIn || !checkOut) {
+            toast.error('Please select check-in and check-out dates');
+            return;
+        }
+        if (nights < 1) {
+            toast.error('Check-out must be after check-in');
+            return;
+        }
+        setBookingLoading(true);
+        try {
+            const { data } = await api.post('/bookings', {
+                listingId: listing._id,
+                checkIn,
+                checkOut,
+                guests,
+            });
+            setConfirmedBooking(data.booking);
+            toast.success('Booking confirmed! 🎉');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not complete booking');
+        } finally {
+            setBookingLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-white">
@@ -140,6 +169,7 @@ const ListingDetail = () => {
     const images = listing.images?.length > 0 ? listing.images : [{ url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop' }];
 
     return (
+        <>
         <div className="min-h-screen bg-white">
             <Navbar />
 
@@ -365,9 +395,18 @@ const ListingDetail = () => {
                                     </div>
                                     <div className="border-t border-gray-200 p-3">
                                         <p className="text-xs font-bold text-gray-800 uppercase tracking-wider">Guests</p>
-                                        <div className="flex items-center justify-between mt-1">
-                                            <p className="text-sm text-gray-500">{nights > 1 ? nights : 1} guest{nights > 1 ? 's' : ''}</p>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <button
+                                                onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                                                className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold text-lg leading-none"
+                                            >−</button>
+                                            <span className="text-sm font-semibold text-gray-800">{guests} guest{guests !== 1 ? 's' : ''}</span>
+                                            <button
+                                                onClick={() => setGuests((g) => Math.min(listing.maxGuests || 10, g + 1))}
+                                                className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold text-lg leading-none"
+                                            >+</button>
                                         </div>
+                                        <p className="text-xs text-gray-400 mt-1">Max {listing.maxGuests} guests</p>
                                     </div>
                                 </div>
 
@@ -378,19 +417,27 @@ const ListingDetail = () => {
                                 </div>
 
                                 {user ? (
-                                    <button
-                                        onClick={() => toast.success('Booking feature coming soon! 🎉')}
-                                        className="btn-primary w-full text-center"
-                                    >
-                                        Reserve
-                                    </button>
+                                    isOwner ? (
+                                        <div className="text-center py-2 text-sm text-gray-400 font-medium">You own this listing</div>
+                                    ) : (
+                                        <button
+                                            id="reserve-btn"
+                                            onClick={handleReserve}
+                                            disabled={bookingLoading}
+                                            className="btn-primary w-full text-center disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            {bookingLoading ? (
+                                                <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> Reserving...</>
+                                            ) : 'Reserve'}
+                                        </button>
+                                    )
                                 ) : (
                                     <Link to="/login" className="btn-primary w-full text-center block">
                                         Log in to reserve
                                     </Link>
                                 )}
 
-                                <p className="text-center text-xs text-gray-400 mt-3">You won't be charged yet</p>
+                                {!isOwner && <p className="text-center text-xs text-gray-400 mt-3">You won't be charged yet</p>}
 
                                 {nights > 0 && (
                                     <div className="mt-5 space-y-2 border-t border-gray-100 pt-4">
@@ -426,6 +473,62 @@ const ListingDetail = () => {
                 </div>
             </div>
         </div>
+
+        {/* ── Booking Confirmation Modal ── */}
+        {confirmedBooking && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setConfirmedBooking(null)}>
+                <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center" onClick={(e) => e.stopPropagation()}>
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg,#FF385C,#E31C5F)' }}>
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">Booking Confirmed!</h2>
+                    <p className="text-gray-500 text-sm mb-6">Your trip to <strong>{confirmedBooking.listing?.title || listing.title}</strong> is all set.</p>
+
+                    <div className="bg-gray-50 rounded-2xl p-5 text-left space-y-3 mb-6">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Check-in</span>
+                            <span className="font-semibold">{new Date(confirmedBooking.checkIn).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Check-out</span>
+                            <span className="font-semibold">{new Date(confirmedBooking.checkOut).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Guests</span>
+                            <span className="font-semibold">{confirmedBooking.guests} guest{confirmedBooking.guests !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">${confirmedBooking.pricePerNight} × {confirmedBooking.nights} night{confirmedBooking.nights !== 1 ? 's' : ''}</span>
+                            <span className="font-semibold">${confirmedBooking.pricePerNight * confirmedBooking.nights}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Cleaning fee</span>
+                            <span className="font-semibold">${confirmedBooking.cleaningFee}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Service fee</span>
+                            <span className="font-semibold">${confirmedBooking.serviceFee}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-200">
+                            <span>Total</span>
+                            <span>${confirmedBooking.totalPrice}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => { setConfirmedBooking(null); navigate('/profile'); }}
+                            className="flex-1 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        >View My Bookings</button>
+                        <button
+                            onClick={() => setConfirmedBooking(null)}
+                            className="flex-1 btn-primary"
+                        >Done</button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 
