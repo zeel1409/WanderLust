@@ -26,19 +26,19 @@ const Home = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    // filter demo listings by current category/search
-    const filterDemo = (list) => {
-        return list.filter((l) => {
+
+    const fetchListings = useCallback(async () => {
+        setLoading(true);
+
+        // filter DEMO_LISTINGS by current category / search (used as fallback)
+        const getFiltered = () => DEMO_LISTINGS.filter((l) => {
             const matchCat = !category || l.category === category;
             const matchSearch = !search ||
                 l.title.toLowerCase().includes(search.toLowerCase()) ||
                 l.location.city.toLowerCase().includes(search.toLowerCase());
             return matchCat && matchSearch;
         });
-    };
 
-    const fetchListings = useCallback(async () => {
-        setLoading(true);
         try {
             const params = { page, limit: 12 };
             if (category) params.category = category;
@@ -48,7 +48,7 @@ const Home = () => {
             const fetched = data.listings || [];
 
             if (fetched.length === 0) {
-                setListings(filterDemo(DEMO_LISTINGS));
+                setListings(getFiltered());
                 setIsDemo(true);
                 setTotalPages(1);
             } else {
@@ -56,15 +56,15 @@ const Home = () => {
                 setIsDemo(false);
                 setTotalPages(Math.max(1, Math.ceil((data.total || 0) / 12)));
             }
-        } catch (err) {
+        } catch {
             console.log('Could not reach backend, showing demo listings');
-            setListings(filterDemo(DEMO_LISTINGS));
+            setListings(getFiltered());
             setIsDemo(true);
             setTotalPages(1);
         } finally {
             setLoading(false);
         }
-    }, [category, search, page]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [category, search, page]);
 
     useEffect(() => {
         fetchListings();
