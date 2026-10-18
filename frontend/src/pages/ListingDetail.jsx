@@ -166,7 +166,7 @@ const ListingDetail = () => {
 
     if (!listing) return null;
 
-    const images = listing.images?.length > 0 ? listing.images : [{ url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop' }];
+    const images = listing.images?.length > 0 ? listing.images : [{ url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=80' }];
 
     return (
         <>
@@ -212,11 +212,11 @@ const ListingDetail = () => {
                 {/* Photo Grid */}
                 <div className="relative rounded-2xl overflow-hidden mb-8">
                     {images.length === 1 ? (
-                        <img src={images[0].url} alt={listing.title} className="w-full h-96 object-cover" />
+                        <img src={images[0].url} alt={listing.title} className="w-full h-96 object-cover" width="800" height="384" fetchpriority="high" />
                     ) : (
                         <div className="grid grid-cols-4 grid-rows-2 gap-2 h-96">
                             <div className="col-span-2 row-span-2">
-                                <img src={images[0]?.url} alt="" className="w-full h-full object-cover" />
+                                <img src={images[0]?.url} alt="" className="w-full h-full object-cover" width="600" height="384" fetchpriority="high" />
                             </div>
                             {images.slice(1, 5).map((img, i) => (
                                 <div key={i} className="relative overflow-hidden">

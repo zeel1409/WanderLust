@@ -7,14 +7,14 @@ import api from '../api/axios';
 
 // fallback listings if the backend is down or DB is empty
 const DEMO_LISTINGS = [
-    { _id: 'demo-1', title: 'Beachfront Villa – Goa', price: 180, location: { city: 'Goa', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&auto=format&fit=crop' }], category: 'Beach', averageRating: 4.9, reviewCount: 48 },
-    { _id: 'demo-2', title: 'Snow Peak Chalet – Shimla', price: 130, location: { city: 'Shimla', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop' }], category: 'Mountains', averageRating: 4.8, reviewCount: 41 },
-    { _id: 'demo-3', title: 'Modern Loft – South Delhi', price: 145, location: { city: 'Delhi', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop' }], category: 'City', averageRating: 4.5, reviewCount: 38 },
-    { _id: 'demo-4', title: 'Desert Camp – Jaisalmer', price: 160, location: { city: 'Jaisalmer', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop' }], category: 'Desert', averageRating: 4.9, reviewCount: 44 },
-    { _id: 'demo-5', title: 'Heritage Haveli – Jaipur', price: 135, location: { city: 'Jaipur', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&auto=format&fit=crop' }], category: 'Luxury', averageRating: 4.9, reviewCount: 56 },
-    { _id: 'demo-6', title: 'Cozy Cabin – Manali', price: 95, location: { city: 'Manali', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=800&auto=format&fit=crop' }], category: 'Cabin', averageRating: 4.8, reviewCount: 32 },
-    { _id: 'demo-7', title: 'Glass Igloo – Rovaniemi', price: 450, location: { city: 'Rovaniemi', country: 'Finland' }, images: [{ url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&auto=format&fit=crop' }], category: 'Arctic', averageRating: 5.0, reviewCount: 89 },
-    { _id: 'demo-8', title: 'Overwater Bungalow – Maldives', price: 620, location: { city: 'Malé', country: 'Maldives' }, images: [{ url: 'https://images.unsplash.com/photo-1439130490301-25e322d88054?w=800&auto=format&fit=crop' }], category: 'Luxury', averageRating: 5.0, reviewCount: 112 },
+    { _id: 'demo-1', title: 'Beachfront Villa – Goa', price: 180, location: { city: 'Goa', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=600&auto=format&fit=crop&q=75' }], category: 'Beach', averageRating: 4.9, reviewCount: 48 },
+    { _id: 'demo-2', title: 'Snow Peak Chalet – Shimla', price: 130, location: { city: 'Shimla', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&auto=format&fit=crop&q=75' }], category: 'Mountains', averageRating: 4.8, reviewCount: 41 },
+    { _id: 'demo-3', title: 'Modern Loft – South Delhi', price: 145, location: { city: 'Delhi', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&auto=format&fit=crop&q=75' }], category: 'City', averageRating: 4.5, reviewCount: 38 },
+    { _id: 'demo-4', title: 'Desert Camp – Jaisalmer', price: 160, location: { city: 'Jaisalmer', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&auto=format&fit=crop&q=75' }], category: 'Desert', averageRating: 4.9, reviewCount: 44 },
+    { _id: 'demo-5', title: 'Heritage Haveli – Jaipur', price: 135, location: { city: 'Jaipur', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=600&auto=format&fit=crop&q=75' }], category: 'Luxury', averageRating: 4.9, reviewCount: 56 },
+    { _id: 'demo-6', title: 'Cozy Pine Cabin – Manali', price: 95, location: { city: 'Manali', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=600&auto=format&fit=crop&q=75' }], category: 'Cabin', averageRating: 4.8, reviewCount: 32 },
+    { _id: 'demo-7', title: 'Glass Igloo – Rovaniemi', price: 450, location: { city: 'Rovaniemi', country: 'Finland' }, images: [{ url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600&auto=format&fit=crop&q=75' }], category: 'Arctic', averageRating: 5.0, reviewCount: 89 },
+    { _id: 'demo-8', title: 'Overwater Bungalow – Maldives', price: 620, location: { city: 'Malé', country: 'Maldives' }, images: [{ url: 'https://images.unsplash.com/photo-1439130490301-25e322d88054?w=600&auto=format&fit=crop&q=75' }], category: 'Luxury', averageRating: 5.0, reviewCount: 112 },
 ];
 
 const Home = () => {
@@ -78,8 +78,17 @@ const Home = () => {
             {!search && !category && (
                 <div style={{ position: 'relative', height: '360px', overflow: 'hidden' }}>
                     <img
-                        src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600&auto=format&fit=crop"
+                        src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&auto=format&fit=crop&q=75"
+                        srcSet="
+                            https://images.unsplash.com/photo-1566073771259-6a8506099945?w=640&auto=format&fit=crop&q=75 640w,
+                            https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1024&auto=format&fit=crop&q=75 1024w,
+                            https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1280&auto=format&fit=crop&q=75 1280w
+                        "
+                        sizes="100vw"
                         alt="Hero"
+                        width="1280"
+                        height="360"
+                        fetchpriority="high"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />

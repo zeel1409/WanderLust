@@ -10,7 +10,7 @@ const PropertyCard = ({ listing }) => {
 
     const images = listing.images?.length > 0
         ? listing.images.map((img) => img.url)
-        : ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop'];
+        : ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=75'];
 
     const [imgIndex, setImgIndex] = useState(0);
     const [fade, setFade] = useState(true);
@@ -40,11 +40,15 @@ const PropertyCard = ({ listing }) => {
             <div className="property-img-wrap">
                 <img
                     src={images[imgIndex]}
+                    srcSet={`${images[imgIndex]} 600w, ${images[imgIndex].replace(/w=\d+/, 'w=1200')} 1200w`}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
                     alt={listing.title}
                     loading="lazy"
+                    width="600"
+                    height="450"
                     style={{ transition: 'opacity 0.15s ease', opacity: fade ? 1 : 0 }}
                     onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop';
+                        e.target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&fit=crop&q=75';
                     }}
                 />
 

@@ -100,7 +100,19 @@ const Signup = () => {
 
             {/* Right: decorative */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=1200&auto=format&fit=crop" alt="Signup" className="w-full h-full object-cover" />
+                <img
+                    src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=900&auto=format&fit=crop&q=80"
+                    srcSet="
+                        https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=640&auto=format&fit=crop&q=80 640w,
+                        https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=900&auto=format&fit=crop&q=80 900w
+                    "
+                    sizes="50vw"
+                    alt="Signup"
+                    className="w-full h-full object-cover"
+                    width="900"
+                    height="900"
+                    loading="lazy"
+                />
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 to-[#FF385C]/80" />
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
                     <h2 className="text-4xl font-extrabold mb-4">Start your journey<br />today ✈️</h2>
