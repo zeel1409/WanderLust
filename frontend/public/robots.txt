@@ -1,0 +1,11 @@
+# WanderLust - robots.txt
+# Allow all crawlers to index the full site
+
+User-agent: *
+Allow: /
+
+# Block backend API routes (no SEO value)
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://wander-lust-ivory-eight.vercel.app/sitemap.xml
