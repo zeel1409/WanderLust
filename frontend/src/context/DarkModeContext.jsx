@@ -1,15 +1,15 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const DarkModeContext = createContext();
 
 export const DarkModeProvider = ({ children }) => {
-    const [dark, setDark] = useState(() => {
-        return localStorage.getItem('wl-dark') === 'true';
-    });
+    const [dark, setDark] = useLocalStorage('wl-dark', false);
 
+    // Apply / remove the 'dark' class on <html> whenever dark changes
     useEffect(() => {
         document.documentElement.classList.toggle('dark', dark);
-        localStorage.setItem('wl-dark', dark);
     }, [dark]);
 
     const toggle = () => setDark((d) => !d);

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CategoryFilter from '../components/CategoryFilter';
 import PropertyCard from '../components/PropertyCard';
+import PropertyCardSkeleton from '../components/PropertyCardSkeleton';
 import api from '../api/axios';
 
 // fallback listings if the backend is down or DB is empty
@@ -36,7 +37,14 @@ const Home = () => {
         setPage(1);
     }, [debouncedSearch]);
 
+    const abortRef = useRef(null);
+
     const fetchListings = useCallback(async () => {
+        // Cancel any previous in-flight request
+        if (abortRef.current) abortRef.current.abort();
+        abortRef.current = new AbortController();
+        const { signal } = abortRef.current;
+
         setLoading(true);
 
         // filter DEMO_LISTINGS by current category / search (used as fallback)
@@ -53,7 +61,7 @@ const Home = () => {
             if (category) params.category = category;
             if (search) params.location = search;
 
-            const { data } = await api.get('/listings', { params });
+            const { data } = await api.get('/listings', { params, signal });
             const fetched = data.listings || [];
 
             if (fetched.length === 0) {
@@ -65,7 +73,9 @@ const Home = () => {
                 setIsDemo(false);
                 setTotalPages(Math.max(1, Math.ceil((data.total || 0) / 12)));
             }
-        } catch {
+        } catch (err) {
+            // Ignore abort errors — a new request is already on the way
+            if (err.name === 'CanceledError' || err.name === 'AbortError') return;
             console.log('Could not reach backend, showing demo listings');
             setListings(getFiltered());
             setIsDemo(true);
@@ -152,9 +162,15 @@ const Home = () => {
             {/* listings grid */}
             <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem' }}>
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-                        <div className="spinner" style={{ margin: '0 auto' }} />
-                        <p style={{ color: '#6b7280', marginTop: '1rem' }}>Loading listings...</p>
+                    /* Skeleton grid — same layout as real cards */
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                        gap: '1.5rem'
+                    }}>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <PropertyCardSkeleton key={i} />
+                        ))}
                     </div>
                 ) : listings.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '5rem 0' }}>
