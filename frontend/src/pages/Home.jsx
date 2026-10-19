@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import CategoryFilter from '../components/CategoryFilter';
@@ -21,11 +22,19 @@ const Home = () => {
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [category, setCategory] = useState('');
-    const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState('');   // raw value from Navbar
+    const debouncedSearch = useDebounce(searchInput, 500); // debounced — used for API
+    const [search, setSearch] = useState('');              // actual search sent to API
     const [isDemo, setIsDemo] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
+
+    // Sync debounced search value → actual search state (resets page too)
+    useEffect(() => {
+        setSearch(debouncedSearch);
+        setPage(1);
+    }, [debouncedSearch]);
 
     const fetchListings = useCallback(async () => {
         setLoading(true);
@@ -72,7 +81,7 @@ const Home = () => {
 
     return (
         <div style={{ minHeight: '100vh', background: 'white' }}>
-            <Navbar onSearch={(val) => { setSearch(val); setPage(1); }} />
+            <Navbar onSearch={(val) => setSearchInput(val)} />
 
             {/* simple hero banner - only show when not searching */}
             {!search && !category && (

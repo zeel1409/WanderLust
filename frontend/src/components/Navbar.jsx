@@ -32,6 +32,7 @@ const Navbar = ({ onSearch }) => {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        // Submit still works (Enter key) — debounce in Home handles API throttling
         if (onSearch) onSearch(searchValue);
     };
 
@@ -58,7 +59,11 @@ const Navbar = ({ onSearch }) => {
                     <input
                         type="text"
                         value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
+                        onChange={(e) => {
+                            setSearchValue(e.target.value);
+                            // Live search — debounced in Home.jsx (500 ms)
+                            if (onSearch) onSearch(e.target.value);
+                        }}
                         placeholder="Search destinations..."
                         className="search-input"
                     />
