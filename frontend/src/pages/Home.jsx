@@ -9,14 +9,14 @@ import api from '../api/axios';
 
 // fallback listings if the backend is down or DB is empty
 const DEMO_LISTINGS = [
-    { _id: 'demo-1', title: 'Beachfront Villa – Goa', price: 180, location: { city: 'Goa', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=600&auto=format&fit=crop&q=75' }], category: 'Beach', averageRating: 4.9, reviewCount: 48 },
-    { _id: 'demo-2', title: 'Snow Peak Chalet – Shimla', price: 130, location: { city: 'Shimla', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&auto=format&fit=crop&q=75' }], category: 'Mountains', averageRating: 4.8, reviewCount: 41 },
-    { _id: 'demo-3', title: 'Modern Loft – South Delhi', price: 145, location: { city: 'Delhi', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&auto=format&fit=crop&q=75' }], category: 'City', averageRating: 4.5, reviewCount: 38 },
-    { _id: 'demo-4', title: 'Desert Camp – Jaisalmer', price: 160, location: { city: 'Jaisalmer', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&auto=format&fit=crop&q=75' }], category: 'Desert', averageRating: 4.9, reviewCount: 44 },
-    { _id: 'demo-5', title: 'Heritage Haveli – Jaipur', price: 135, location: { city: 'Jaipur', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=600&auto=format&fit=crop&q=75' }], category: 'Luxury', averageRating: 4.9, reviewCount: 56 },
-    { _id: 'demo-6', title: 'Cozy Pine Cabin – Manali', price: 95, location: { city: 'Manali', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=600&auto=format&fit=crop&q=75' }], category: 'Cabin', averageRating: 4.8, reviewCount: 32 },
-    { _id: 'demo-7', title: 'Glass Igloo – Rovaniemi', price: 450, location: { city: 'Rovaniemi', country: 'Finland' }, images: [{ url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600&auto=format&fit=crop&q=75' }], category: 'Arctic', averageRating: 5.0, reviewCount: 89 },
-    { _id: 'demo-8', title: 'Overwater Bungalow – Maldives', price: 620, location: { city: 'Malé', country: 'Maldives' }, images: [{ url: 'https://images.unsplash.com/photo-1439130490301-25e322d88054?w=600&auto=format&fit=crop&q=75' }], category: 'Luxury', averageRating: 5.0, reviewCount: 112 },
+    { _id: 'demo-1', title: 'Beachfront Paradise Villa – Goa', price: 14500, location: { city: 'Goa', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=600&auto=format&fit=crop&q=75' }], category: 'Beach', averageRating: 4.9, reviewCount: 48 },
+    { _id: 'demo-2', title: 'Snow Peak Chalet – Shimla', price: 10500, location: { city: 'Shimla', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1548777123-e216912df7d8?w=600&auto=format&fit=crop&q=75' }], category: 'Mountains', averageRating: 4.8, reviewCount: 41 },
+    { _id: 'demo-3', title: 'Heritage Loft – Old Delhi', price: 7800, location: { city: 'Delhi', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&auto=format&fit=crop&q=75' }], category: 'City', averageRating: 4.5, reviewCount: 38 },
+    { _id: 'demo-4', title: 'Royal Dunes Glamping – Jaisalmer', price: 12500, location: { city: 'Jaisalmer', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600&auto=format&fit=crop&q=75' }], category: 'Desert', averageRating: 4.9, reviewCount: 44 },
+    { _id: 'demo-5', title: 'Heritage Courtyard Haveli – Jaipur', price: 21500, location: { city: 'Jaipur', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=75' }], category: 'Luxury', averageRating: 4.9, reviewCount: 56 },
+    { _id: 'demo-6', title: 'Cozy Pine Cabin – Manali', price: 6800, location: { city: 'Manali', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=600&auto=format&fit=crop&q=75' }], category: 'Cabin', averageRating: 4.8, reviewCount: 32 },
+    { _id: 'demo-7', title: 'Glass Igloo Suite – Rovaniemi', price: 36000, location: { city: 'Rovaniemi', country: 'Finland' }, images: [{ url: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?w=600&auto=format&fit=crop&q=75' }], category: 'Arctic', averageRating: 5.0, reviewCount: 89 },
+    { _id: 'demo-8', title: 'Luxury Backwater Houseboat – Alleppey', price: 15500, location: { city: 'Alleppey', country: 'India' }, images: [{ url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&auto=format&fit=crop&q=75' }], category: 'Island', averageRating: 5.0, reviewCount: 112 },
 ];
 
 const Home = () => {
@@ -192,36 +192,69 @@ const Home = () => {
 
                 {/* pagination */}
                 {!isDemo && totalPages > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '2.5rem' }}>
-                        <button
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            style={{
-                                padding: '8px 20px', borderRadius: '9999px',
-                                border: '1px solid #e5e7eb', background: 'white',
-                                fontSize: '0.875rem', fontWeight: 600,
-                                cursor: page === 1 ? 'not-allowed' : 'pointer',
-                                opacity: page === 1 ? 0.4 : 1
-                            }}
-                        >
-                            ← Prev
-                        </button>
-                        <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                            {page} / {totalPages}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', marginTop: '3rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => {
+                                    setPage((p) => Math.max(1, p - 1));
+                                    window.scrollTo({ top: 320, behavior: 'smooth' });
+                                }}
+                                disabled={page === 1}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '9999px',
+                                    border: '1px solid #e5e7eb', background: 'white',
+                                    fontSize: '0.875rem', fontWeight: 600,
+                                    cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                    opacity: page === 1 ? 0.4 : 1,
+                                    color: '#374151'
+                                }}
+                            >
+                                ← Prev
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((num) => (
+                                <button
+                                    key={num}
+                                    onClick={() => {
+                                        setPage(num);
+                                        window.scrollTo({ top: 320, behavior: 'smooth' });
+                                    }}
+                                    style={{
+                                        width: '38px', height: '38px', borderRadius: '50%',
+                                        border: page === num ? 'none' : '1px solid #e5e7eb',
+                                        background: page === num ? '#FF385C' : 'white',
+                                        color: page === num ? 'white' : '#374151',
+                                        fontSize: '0.875rem', fontWeight: 700,
+                                        cursor: 'pointer',
+                                        boxShadow: page === num ? '0 2px 8px rgba(255,56,92,0.3)' : 'none',
+                                        transition: 'all 0.15s ease'
+                                    }}
+                                >
+                                    {num}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => {
+                                    setPage((p) => Math.min(totalPages, p + 1));
+                                    window.scrollTo({ top: 320, behavior: 'smooth' });
+                                }}
+                                disabled={page === totalPages}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '9999px',
+                                    border: '1px solid #e5e7eb', background: 'white',
+                                    fontSize: '0.875rem', fontWeight: 600,
+                                    cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                                    opacity: page === totalPages ? 0.4 : 1,
+                                    color: '#374151'
+                                }}
+                            >
+                                Next →
+                            </button>
+                        </div>
+                        <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                            Page {page} of {totalPages}
                         </span>
-                        <button
-                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            style={{
-                                padding: '8px 20px', borderRadius: '9999px',
-                                border: '1px solid #e5e7eb', background: 'white',
-                                fontSize: '0.875rem', fontWeight: 600,
-                                cursor: page === totalPages ? 'not-allowed' : 'pointer',
-                                opacity: page === totalPages ? 0.4 : 1
-                            }}
-                        >
-                            Next →
-                        </button>
                     </div>
                 )}
             </div>
@@ -236,15 +269,17 @@ const Home = () => {
                                 Discover unique stays around the world.
                             </p>
                         </div>
-                        <div>
+                        <div style={{ gridColumn: 'span 2' }}>
                             <p style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Explore</p>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {['Beach', 'Mountains', 'City', 'Desert', 'Luxury'].map((l) => (
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem 1rem' }}>
+                                {['Beach', 'Mountains', 'City', 'Countryside', 'Desert', 'Arctic', 'Luxury', 'Cabin', 'Treehouse', 'Island'].map((l) => (
                                     <li key={l}>
                                         <Link
                                             to="/"
                                             onClick={() => { setCategory(l); setPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                            style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}
+                                            style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                                            onMouseEnter={(e) => e.target.style.color = '#111827'}
+                                            onMouseLeave={(e) => e.target.style.color = '#6b7280'}
                                         >
                                             {l}
                                         </Link>
@@ -255,8 +290,22 @@ const Home = () => {
                         <div>
                             <p style={{ fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Support</p>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <li><Link to="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Help Center</Link></li>
-                                <li><Link to="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Contact Us</Link></li>
+                                <li>
+                                    <a
+                                        href="mailto:support@wanderlust.com?subject=Wanderlust%20Help%20Center"
+                                        style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}
+                                    >
+                                        Help Center
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="mailto:contact@wanderlust.com?subject=Inquiry%20via%20Wanderlust"
+                                        style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}
+                                    >
+                                        Contact Us
+                                    </a>
+                                </li>
                                 <li><Link to="/privacy" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Privacy Policy</Link></li>
                                 <li><Link to="/terms" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Terms of Service</Link></li>
                             </ul>

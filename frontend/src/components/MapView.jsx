@@ -55,7 +55,7 @@ const MapView = ({ coordinates, listings = [], zoom = 12 }) => {
 
                     const el = document.createElement('div');
                     el.className = 'mapbox-marker';
-                    el.textContent = `$${listing.price}`;
+                    el.textContent = `₹${Number(listing.price || 0).toLocaleString('en-IN')}`;
                     el.style.cssText = `
             background: #FF385C; color: white; border-radius: 20px;
             padding: 4px 10px; font-size: 12px; font-weight: 700;
@@ -67,7 +67,7 @@ const MapView = ({ coordinates, listings = [], zoom = 12 }) => {
                         `<div style="font-family:'Plus Jakarta Sans',sans-serif;padding:4px">
               <strong style="font-size:13px">${listing.title}</strong>
               <p style="margin:2px 0;color:#666;font-size:12px">${listing.location.city}, ${listing.location.country}</p>
-              <strong style="color:#FF385C">$${listing.price}/night</strong>
+              <strong style="color:#FF385C">₹${Number(listing.price || 0).toLocaleString('en-IN')}/night</strong>
             </div>`
                     );
 

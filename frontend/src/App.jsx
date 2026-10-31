@@ -5,6 +5,7 @@ import { DarkModeProvider } from './context/DarkModeContext';
 import { WishlistProvider } from './context/WishlistContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './components/ScrollToTop';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -24,6 +25,7 @@ function App() {
           {/* Top-level boundary — catches anything that slips through */}
           <ErrorBoundary>
             <BrowserRouter>
+              <ScrollToTop />
               <Toaster
                 position="top-center"
                 toastOptions={{

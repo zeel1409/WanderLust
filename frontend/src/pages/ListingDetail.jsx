@@ -366,7 +366,7 @@ const ListingDetail = () => {
                             {/* Booking card */}
                             <div className="rounded-2xl border border-gray-200 shadow-xl p-6">
                                 <div className="flex items-end gap-1 mb-5">
-                                    <span className="text-2xl font-extrabold text-gray-900">${listing.price}</span>
+                                    <span className="text-2xl font-extrabold text-gray-900">₹{Number(listing.price || 0).toLocaleString('en-IN')}</span>
                                     <span className="text-gray-500 text-sm mb-0.5">/ night</span>
                                 </div>
 
@@ -442,20 +442,20 @@ const ListingDetail = () => {
                                 {nights > 0 && (
                                     <div className="mt-5 space-y-2 border-t border-gray-100 pt-4">
                                         <div className="flex justify-between text-sm text-gray-600">
-                                            <span>${listing.price} × {nights} night{nights > 1 ? 's' : ''}</span>
-                                            <span>${listing.price * nights}</span>
+                                            <span>₹{Number(listing.price || 0).toLocaleString('en-IN')} × {nights} night{nights > 1 ? 's' : ''}</span>
+                                            <span>₹{Number((listing.price || 0) * nights).toLocaleString('en-IN')}</span>
                                         </div>
                                         <div className="flex justify-between text-sm text-gray-600">
                                             <span>Cleaning fee</span>
-                                            <span>$30</span>
+                                            <span>₹500</span>
                                         </div>
                                         <div className="flex justify-between text-sm text-gray-600">
                                             <span>Service fee</span>
-                                            <span>${Math.round(listing.price * nights * 0.12)}</span>
+                                            <span>₹{Math.round((listing.price || 0) * nights * 0.12).toLocaleString('en-IN')}</span>
                                         </div>
                                         <div className="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-100">
                                             <span>Total</span>
-                                            <span>${listing.price * nights + 30 + Math.round(listing.price * nights * 0.12)}</span>
+                                            <span>₹{((listing.price || 0) * nights + 500 + Math.round((listing.price || 0) * nights * 0.12)).toLocaleString('en-IN')}</span>
                                         </div>
                                     </div>
                                 )}
@@ -498,20 +498,20 @@ const ListingDetail = () => {
                             <span className="font-semibold">{confirmedBooking.guests} guest{confirmedBooking.guests !== 1 ? 's' : ''}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">${confirmedBooking.pricePerNight} × {confirmedBooking.nights} night{confirmedBooking.nights !== 1 ? 's' : ''}</span>
-                            <span className="font-semibold">${confirmedBooking.pricePerNight * confirmedBooking.nights}</span>
+                            <span className="text-gray-500">₹{Number(confirmedBooking.pricePerNight || 0).toLocaleString('en-IN')} × {confirmedBooking.nights} night{confirmedBooking.nights !== 1 ? 's' : ''}</span>
+                            <span className="font-semibold">₹{Number((confirmedBooking.pricePerNight || 0) * confirmedBooking.nights).toLocaleString('en-IN')}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Cleaning fee</span>
-                            <span className="font-semibold">${confirmedBooking.cleaningFee}</span>
+                            <span className="font-semibold">₹{Number(confirmedBooking.cleaningFee || 0).toLocaleString('en-IN')}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Service fee</span>
-                            <span className="font-semibold">${confirmedBooking.serviceFee}</span>
+                            <span className="font-semibold">₹{Number(confirmedBooking.serviceFee || 0).toLocaleString('en-IN')}</span>
                         </div>
                         <div className="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-200">
                             <span>Total</span>
-                            <span>${confirmedBooking.totalPrice}</span>
+                            <span>₹{Number(confirmedBooking.totalPrice || 0).toLocaleString('en-IN')}</span>
                         </div>
                     </div>
 

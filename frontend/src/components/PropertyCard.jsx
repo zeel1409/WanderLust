@@ -108,7 +108,10 @@ const PropertyCard = ({ listing }) => {
                         }}>
                             {listing.title}
                         </h3>
-                        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#6b7280' }}>
+                        <p style={{
+                            margin: '2px 0 0', fontSize: '0.8rem', color: '#6b7280',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                        }}>
                             {listing.location?.city}, {listing.location?.country}
                         </p>
                     </div>
@@ -124,7 +127,9 @@ const PropertyCard = ({ listing }) => {
                     )}
                 </div>
                 <div style={{ marginTop: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>${listing.price}</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#111827' }}>
+                        ₹{Number(listing.price || 0).toLocaleString('en-IN')}
+                    </span>
                     <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 400 }}> / night</span>
                 </div>
             </div>
@@ -136,7 +141,7 @@ const PropertyCard = ({ listing }) => {
     if (isDemo) {
         return (
             <div
-                style={{ textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer' }}
+                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }}
                 onClick={() => toast('Connect your database and run node seed.js to view full listing details.', { icon: '💡' })}
             >
                 {cardContent}
@@ -145,7 +150,7 @@ const PropertyCard = ({ listing }) => {
     }
 
     return (
-        <Link to={`/listings/${listing._id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+        <Link to={`/listings/${listing._id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
             {cardContent}
         </Link>
     );

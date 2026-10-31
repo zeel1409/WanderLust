@@ -69,7 +69,7 @@ router.post('/', protect, async (req, res) => {
 
         // 6. Price calculation
         const nights      = Math.ceil((outDate - inDate) / 86400000);
-        const cleaningFee = 30;
+        const cleaningFee = 500;
         const serviceFee  = Math.round(listing.price * nights * 0.12);
         const totalPrice  = listing.price * nights + cleaningFee + serviceFee;
 

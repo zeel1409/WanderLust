@@ -8,15 +8,18 @@ const PropertyCardSkeleton = () => (
         borderRadius: '16px',
         overflow: 'hidden',
         background: 'white',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
     }}>
         {/* Image placeholder — same 4:3 ratio as real card */}
         <div
             className="skeleton"
-            style={{ aspectRatio: '4/3', width: '100%', borderRadius: '0' }}
+            style={{ aspectRatio: '4/3', width: '100%', borderRadius: '0', flexShrink: 0 }}
         />
 
         {/* Info rows */}
-        <div style={{ padding: '12px 4px 4px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ padding: '12px 4px 4px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, justifyContent: 'space-between' }}>
             {/* Title + rating row */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {/* Title */}

@@ -270,7 +270,7 @@ const Profile = () => {
                                                             <span>👤 {b.guests} guest{b.guests !== 1 ? 's' : ''}</span>
                                                             <span>🌙 {b.nights} night{b.nights !== 1 ? 's' : ''}</span>
                                                         </div>
-                                                        <p className="text-sm font-bold text-gray-900 mt-1.5">${b.totalPrice} total</p>
+                                                        <p className="text-sm font-bold text-gray-900 mt-1.5">₹{Number(b.totalPrice || 0).toLocaleString('en-IN')} total</p>
                                                     </div>
 
                                                     <div className="shrink-0 flex flex-col items-end gap-2">
